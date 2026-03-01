@@ -24,7 +24,7 @@ import {
   SupplierOrderDetail,
   Reports,
 } from "@/pages/dashboard";
-import { SignIn, SignUp, Login } from "@/pages/auth";
+import { Login } from "@/pages/auth";
 
 const icon = { className: "w-5 h-5 text-inherit" };
 
@@ -60,8 +60,7 @@ export const routes = [
     title: "auth pages",
     layout: "auth",
     pages: [
-      { icon: null, name: "sign in", path: "/sign-in", element: <Login /> },
-      { icon: null, name: "sign up", path: "/sign-up", element: <SignUp /> },
+      { icon: null, name: "Đăng nhập", path: "/sign-in", element: <Login /> },
     ],
   },
 ];

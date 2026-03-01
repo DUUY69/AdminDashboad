@@ -27,8 +27,8 @@ export function SupplierOrderList() {
   const clearFilters = () => { setFilterStatus(""); setFilterDateFrom(""); setFilterDateTo(""); };
 
   return (
-    <div className="mt-12">
-      <Card className="border border-blue-gray-100">
+    <div className="mt-12 w-full max-w-full min-w-0">
+      <Card className="border border-blue-gray-100 w-full max-w-full">
         <CardHeader className="p-4 border-b">
           <div className="flex flex-col gap-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -60,14 +60,14 @@ export function SupplierOrderList() {
           <div className="px-4 py-2 border-b border-blue-gray-50">
             <Typography variant="small" color="gray">Hiển thị <strong>{filtered.length}</strong> đơn con</Typography>
           </div>
-          <table className="w-full min-w-[640px] table-auto">
+          <table className="w-full table-fixed" style={{ tableLayout: "fixed" }}>
             <thead>
               <tr>
-                <th className="border-b border-blue-gray-50 py-3 px-4 text-left"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">ID đơn con</Typography></th>
-                <th className="border-b border-blue-gray-50 py-3 px-4 text-left"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Đơn tổng #</Typography></th>
-                <th className="border-b border-blue-gray-50 py-3 px-4 text-left"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Cửa hàng</Typography></th>
-                <th className="border-b border-blue-gray-50 py-3 px-4 text-left"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Trạng thái</Typography></th>
-                <th className="border-b border-blue-gray-50 py-3 px-4 text-left"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Thao tác</Typography></th>
+                <th className="border-b border-blue-gray-50 py-3 px-3 text-left w-24"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">ID đơn con</Typography></th>
+                <th className="border-b border-blue-gray-50 py-3 px-3 text-left"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Cửa hàng</Typography></th>
+                <th className="border-b border-blue-gray-50 py-3 px-3 text-left w-24"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Đơn tổng #</Typography></th>
+                <th className="border-b border-blue-gray-50 py-3 px-3 text-left w-32"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Trạng thái</Typography></th>
+                <th className="border-b border-blue-gray-50 py-3 px-3 text-left w-28"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Thao tác</Typography></th>
               </tr>
             </thead>
             <tbody>
@@ -78,13 +78,13 @@ export function SupplierOrderList() {
                   </td>
                 </tr>
               ) : filtered.map((os) => (
-                <tr key={os.id}>
-                  <td className="py-3 px-4 border-b border-blue-gray-50"><Typography variant="small">{os.id}</Typography></td>
-                  <td className="py-3 px-4 border-b border-blue-gray-50"><Typography variant="small">#{os.orderId}</Typography></td>
-                  <td className="py-3 px-4 border-b border-blue-gray-50"><Typography variant="small">{os.order?.storeName}</Typography></td>
-                  <td className="py-3 px-4 border-b border-blue-gray-50"><Chip size="sm" color={statusColors[os.status] || "gray"} value={os.status} /></td>
-                  <td className="py-3 px-4 border-b border-blue-gray-50">
-                    <Typography as="a" href="#" className="text-xs font-semibold text-blue-600" onClick={(e) => { e.preventDefault(); navigate(`/dashboard/supplier-orders/${os.id}`); }}>
+                <tr key={os.id} className="hover:bg-blue-gray-50/50 align-baseline">
+                  <td className="py-3 px-3 border-b border-blue-gray-50 align-middle"><Typography variant="small">{os.id}</Typography></td>
+                  <td className="py-3 px-3 border-b border-blue-gray-50 align-middle min-w-0"><Typography variant="small" className="truncate block" title={os.order?.storeName}>{os.order?.storeName}</Typography></td>
+                  <td className="py-3 px-3 border-b border-blue-gray-50 align-middle"><Typography variant="small">#{os.orderId}</Typography></td>
+                  <td className="py-3 px-3 border-b border-blue-gray-50 align-middle"><Chip size="sm" color={statusColors[os.status] || "gray"} value={os.status} className="w-fit max-w-full truncate" /></td>
+                  <td className="py-3 px-3 border-b border-blue-gray-50 align-middle">
+                    <Typography as="a" href="#" className="text-xs font-semibold text-blue-600 hover:underline whitespace-nowrap" onClick={(e) => { e.preventDefault(); navigate(`/dashboard/supplier-orders/${os.id}`); }}>
                       Xem / Xử lý
                     </Typography>
                   </td>

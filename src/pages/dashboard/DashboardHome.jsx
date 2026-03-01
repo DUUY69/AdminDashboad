@@ -242,33 +242,25 @@ export function DashboardHome() {
                   <Button size="sm" variant="outlined">Xem tất cả</Button>
                 </Link>
               </CardHeader>
-              <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
-                <table className="w-full min-w-[640px] table-auto">
+              <CardBody className="overflow-x-auto px-0 pt-0 pb-2">
+                <table className="w-full table-fixed" style={{ tableLayout: "fixed" }}>
                   <thead>
                     <tr>
-                      {["Mã đơn", "Cửa hàng", "Ngày đặt", "Trạng thái", "Thao tác"].map((el) => (
-                        <th key={el} className="border-b border-blue-gray-50 py-3 px-6 text-left">
-                          <Typography variant="small" className="text-[11px] font-medium uppercase text-blue-gray-400">{el}</Typography>
-                        </th>
-                      ))}
+                      <th className="border-b border-blue-gray-50 py-3 px-4 text-left" style={{ width: "6%" }}><Typography variant="small" className="text-[11px] font-medium uppercase text-blue-gray-400">Mã đơn</Typography></th>
+                      <th className="border-b border-blue-gray-50 py-3 px-4 text-left" style={{ width: "28%" }}><Typography variant="small" className="text-[11px] font-medium uppercase text-blue-gray-400">Cửa hàng</Typography></th>
+                      <th className="border-b border-blue-gray-50 py-3 px-4 text-left" style={{ width: "12%" }}><Typography variant="small" className="text-[11px] font-medium uppercase text-blue-gray-400">Ngày đặt</Typography></th>
+                      <th className="border-b border-blue-gray-50 py-3 px-4 text-left" style={{ width: "18%" }}><Typography variant="small" className="text-[11px] font-medium uppercase text-blue-gray-400">Trạng thái</Typography></th>
+                      <th className="border-b border-blue-gray-50 py-3 px-4 text-left" style={{ width: "36%" }}><Typography variant="small" className="text-[11px] font-medium uppercase text-blue-gray-400">Thao tác</Typography></th>
                     </tr>
                   </thead>
                   <tbody>
                     {recentOrders.map((o) => (
-                      <tr key={o.id}>
-                        <td className="border-b border-blue-gray-50 py-3 px-6">
-                          <Typography variant="small" className="font-semibold">#{o.id}</Typography>
-                        </td>
-                        <td className="border-b border-blue-gray-50 py-3 px-6">
-                          <Typography variant="small">{o.storeName}</Typography>
-                        </td>
-                        <td className="border-b border-blue-gray-50 py-3 px-6">
-                          <Typography variant="small">{o.orderDate}</Typography>
-                        </td>
-                        <td className="border-b border-blue-gray-50 py-3 px-6">
-                          <Chip size="sm" value={o.status} color={o.status === "Completed" ? "green" : o.status === "Draft" ? "gray" : "blue"} />
-                        </td>
-                        <td className="border-b border-blue-gray-50 py-3 px-6">
+                      <tr key={o.id} className="hover:bg-blue-gray-50/50">
+                        <td className="border-b border-blue-gray-50 py-3 px-4"><Typography variant="small" className="font-semibold">#{o.id}</Typography></td>
+                        <td className="border-b border-blue-gray-50 py-3 px-4 min-w-0"><Typography variant="small" className="truncate block" title={o.storeName}>{o.storeName}</Typography></td>
+                        <td className="border-b border-blue-gray-50 py-3 px-4 whitespace-nowrap"><Typography variant="small">{o.orderDate}</Typography></td>
+                        <td className="border-b border-blue-gray-50 py-3 px-4"><Chip size="sm" value={o.status} color={o.status === "Completed" ? "green" : o.status === "Draft" ? "gray" : "blue"} className="w-fit max-w-full truncate" /></td>
+                        <td className="border-b border-blue-gray-50 py-3 px-4">
                           <Button size="sm" variant="text" className="p-1 text-xs font-semibold text-blue-600" onClick={() => navigate(`/dashboard/orders/${o.id}`)}>
                             Xem / Theo dõi
                           </Button>
@@ -422,27 +414,25 @@ export function DashboardHome() {
                   <Button size="sm" variant="outlined">Xem tất cả</Button>
                 </Link>
               </CardHeader>
-              <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
-                <table className="w-full min-w-[640px] table-auto">
+              <CardBody className="overflow-x-auto px-0 pt-0 pb-2">
+                <table className="w-full table-fixed" style={{ tableLayout: "fixed" }}>
                   <thead>
                     <tr>
-                      {["Mã đơn", "Cửa hàng", "Ngày đặt", "Trạng thái", "Thao tác"].map((el) => (
-                        <th key={el} className="border-b border-blue-gray-50 py-3 px-6 text-left">
-                          <Typography variant="small" className="text-[11px] font-medium uppercase text-blue-gray-400">{el}</Typography>
-                        </th>
-                      ))}
+                      <th className="border-b border-blue-gray-50 py-3 px-4 text-left" style={{ width: "6%" }}><Typography variant="small" className="text-[11px] font-medium uppercase text-blue-gray-400">Mã đơn</Typography></th>
+                      <th className="border-b border-blue-gray-50 py-3 px-4 text-left" style={{ width: "28%" }}><Typography variant="small" className="text-[11px] font-medium uppercase text-blue-gray-400">Cửa hàng</Typography></th>
+                      <th className="border-b border-blue-gray-50 py-3 px-4 text-left" style={{ width: "12%" }}><Typography variant="small" className="text-[11px] font-medium uppercase text-blue-gray-400">Ngày đặt</Typography></th>
+                      <th className="border-b border-blue-gray-50 py-3 px-4 text-left" style={{ width: "18%" }}><Typography variant="small" className="text-[11px] font-medium uppercase text-blue-gray-400">Trạng thái</Typography></th>
+                      <th className="border-b border-blue-gray-50 py-3 px-4 text-left" style={{ width: "36%" }}><Typography variant="small" className="text-[11px] font-medium uppercase text-blue-gray-400">Thao tác</Typography></th>
                     </tr>
                   </thead>
                   <tbody>
                     {storeRecentOrders.map((o) => (
-                      <tr key={o.id}>
-                        <td className="border-b border-blue-gray-50 py-3 px-6"><Typography variant="small" className="font-semibold">#{o.id}</Typography></td>
-                        <td className="border-b border-blue-gray-50 py-3 px-6"><Typography variant="small">{o.storeName}</Typography></td>
-                        <td className="border-b border-blue-gray-50 py-3 px-6"><Typography variant="small">{o.orderDate}</Typography></td>
-                        <td className="border-b border-blue-gray-50 py-3 px-6">
-                          <Chip size="sm" value={o.status} color={o.status === "Completed" ? "green" : o.status === "Draft" ? "gray" : "blue"} />
-                        </td>
-                        <td className="border-b border-blue-gray-50 py-3 px-6">
+                      <tr key={o.id} className="hover:bg-blue-gray-50/50">
+                        <td className="border-b border-blue-gray-50 py-3 px-4"><Typography variant="small" className="font-semibold">#{o.id}</Typography></td>
+                        <td className="border-b border-blue-gray-50 py-3 px-4 min-w-0"><Typography variant="small" className="truncate block" title={o.storeName}>{o.storeName}</Typography></td>
+                        <td className="border-b border-blue-gray-50 py-3 px-4 whitespace-nowrap"><Typography variant="small">{o.orderDate}</Typography></td>
+                        <td className="border-b border-blue-gray-50 py-3 px-4"><Chip size="sm" value={o.status} color={o.status === "Completed" ? "green" : o.status === "Draft" ? "gray" : "blue"} className="w-fit max-w-full truncate" /></td>
+                        <td className="border-b border-blue-gray-50 py-3 px-4">
                           <Button size="sm" variant="text" className="p-1 text-xs font-semibold text-blue-600" onClick={() => navigate(`/dashboard/orders/${o.id}`)}>
                             Xem / Theo dõi
                           </Button>

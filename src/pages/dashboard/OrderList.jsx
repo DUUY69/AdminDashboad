@@ -12,7 +12,7 @@ import {
   Button,
 } from "@material-tailwind/react";
 import { FilterSelect } from "@/components/FilterSelect";
-import { PrinterIcon, FunnelIcon, XMarkIcon, CheckCircleIcon } from "@heroicons/react/24/solid";
+import { PrinterIcon, FunnelIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { useData } from "@/context/DataContext";
 import { useAuth } from "@/context";
 
@@ -82,8 +82,8 @@ export function OrderList() {
   };
 
   return (
-    <div className="mt-12">
-      <Card className="border border-blue-gray-100">
+    <div className="mt-12 w-full max-w-full min-w-0">
+      <Card className="border border-blue-gray-100 w-full max-w-full">
         <CardHeader className="p-4 pb-5 border-b">
           <div className="flex flex-col gap-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -125,53 +125,61 @@ export function OrderList() {
           <div className="px-4 py-2 border-b border-blue-gray-50 flex justify-between items-center">
             <Typography variant="small" color="gray">Hiển thị <strong>{list.length}</strong> đơn</Typography>
           </div>
-          <table className="w-full min-w-[640px] table-auto">
+          <table className="w-full table-fixed" style={{ tableLayout: "fixed" }}>
             <thead>
               <tr>
-                <th className="border-b border-blue-gray-50 py-3 px-4 text-left"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">ID</Typography></th>
-                <th className="border-b border-blue-gray-50 py-3 px-4 text-left"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Cửa hàng</Typography></th>
-                <th className="border-b border-blue-gray-50 py-3 px-4 text-left"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Ngày đặt</Typography></th>
-                <th className="border-b border-blue-gray-50 py-3 px-4 text-left"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Trạng thái</Typography></th>
-                <th className="border-b border-blue-gray-50 py-3 px-4 text-left w-px"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Thao tác</Typography></th>
+                <th className="border-b border-blue-gray-50 py-3 px-3 text-left w-14"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">ID</Typography></th>
+                <th className="border-b border-blue-gray-50 py-3 px-3 text-left w-24"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Tên đơn</Typography></th>
+                <th className="border-b border-blue-gray-50 py-3 px-3 text-left"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Tên cửa hàng</Typography></th>
+                <th className="border-b border-blue-gray-50 py-3 px-3 text-left w-28"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Ngày</Typography></th>
+                <th className="border-b border-blue-gray-50 py-3 px-3 text-left w-32"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Trạng thái</Typography></th>
+                <th className="border-b border-blue-gray-50 py-3 px-3 text-left w-40"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Thao tác</Typography></th>
               </tr>
             </thead>
             <tbody>
               {list.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center">
+                  <td colSpan={6} className="py-12 text-center">
                     <Typography color="gray">Không có đơn nào thỏa bộ lọc. Thử xóa bộ lọc hoặc tạo đơn mới.</Typography>
                   </td>
                 </tr>
               ) : list.map((row) => (
-                <tr key={row.id} className="hover:bg-blue-gray-50/50">
-                  <td className="py-3 px-4 border-b border-blue-gray-50"><Typography variant="small">#{row.id}</Typography></td>
-                  <td className="py-3 px-4 border-b border-blue-gray-50"><Typography variant="small">{row.storeName}</Typography></td>
-                  <td className="py-3 px-4 border-b border-blue-gray-50"><Typography variant="small">{row.orderDate}</Typography></td>
-                  <td className="py-3 px-4 border-b border-blue-gray-50"><Chip size="sm" color={statusColors[row.status] || "gray"} value={row.status} /></td>
-                  <td className="py-3 px-4 border-b border-blue-gray-50 align-top w-px">
-                    <div className="flex flex-col gap-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Typography as="a" href="#" className="text-xs font-semibold text-blue-600 hover:underline" onClick={(e) => { e.preventDefault(); navigate(`/dashboard/orders/${row.id}`); }}>
-                          Xem / Theo dõi
-                        </Typography>
-                        <span className="text-blue-gray-300">|</span>
-                        <Tooltip content="Xuất đơn / In">
-                          <IconButton variant="text" size="sm" onClick={() => exportOrderPrint(row, stores)}>
-                            <PrinterIcon className="w-4 h-4" />
-                          </IconButton>
-                        </Tooltip>
-                      </div>
-                      {isAdmin && row.status === "Submitted" && (
-                        <div className="flex items-center gap-2 pt-1 border-t border-blue-gray-100">
-                          <Typography variant="small" className="text-blue-gray-500 shrink-0">Duyệt:</Typography>
-                          <Button size="sm" color="green" variant="filled" className="!min-h-8 !py-1.5 !px-2.5 text-xs font-medium" onClick={() => handleAdminAcceptOrder(row)}>
-                            <CheckCircleIcon className="w-4 h-4 mr-1" /> Chấp nhận
-                          </Button>
-                          <Button size="sm" color="red" variant="outlined" className="!min-h-8 !py-1.5 !px-2.5 text-xs font-medium" onClick={() => handleAdminRejectOrder(row)}>
-                            <XMarkIcon className="w-4 h-4 mr-1" /> Từ chối
-                          </Button>
-                        </div>
-                      )}
+                <tr key={row.id} className="hover:bg-blue-gray-50/50 align-baseline">
+                  <td className="py-3 px-3 border-b border-blue-gray-50 align-middle"><Typography variant="small" className="font-medium">#{row.id}</Typography></td>
+                  <td className="py-3 px-3 border-b border-blue-gray-50 align-middle"><Typography variant="small">Đơn #{row.id}</Typography></td>
+                  <td className="py-3 px-3 border-b border-blue-gray-50 align-middle min-w-0"><Typography variant="small" className="truncate block" title={row.storeName}>{row.storeName}</Typography></td>
+                  <td className="py-3 px-3 border-b border-blue-gray-50 align-middle whitespace-nowrap"><Typography variant="small">{row.orderDate}</Typography></td>
+                  <td className="py-3 px-3 border-b border-blue-gray-50 align-middle">
+                    {isAdmin && row.status === "Submitted" ? (
+                      <select
+                        value=""
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          if (v === "accept") handleAdminAcceptOrder(row);
+                          else if (v === "reject") handleAdminRejectOrder(row);
+                          e.target.value = "";
+                        }}
+                        className="w-full max-w-[140px] rounded-lg border border-blue-gray-200 bg-white px-2 py-1.5 text-sm text-blue-gray-700 outline-none focus:border-blue-500"
+                      >
+                        <option value="">Trạng thái: Submitted</option>
+                        <option value="accept">Chấp nhận</option>
+                        <option value="reject">Từ chối</option>
+                      </select>
+                    ) : (
+                      <Chip size="sm" color={statusColors[row.status] || "gray"} value={row.status} className="w-fit max-w-full truncate" />
+                    )}
+                  </td>
+                  <td className="py-3 px-3 border-b border-blue-gray-50 align-middle">
+                    <div className="flex flex-wrap items-center gap-x-2">
+                      <Typography as="a" href="#" className="text-xs font-semibold text-blue-600 hover:underline whitespace-nowrap shrink-0" onClick={(e) => { e.preventDefault(); navigate(`/dashboard/orders/${row.id}`); }}>
+                        Xem / Theo dõi
+                      </Typography>
+                      <span className="text-blue-gray-300 shrink-0">|</span>
+                      <Tooltip content="Xuất đơn / In">
+                        <IconButton variant="text" size="sm" className="shrink-0" onClick={() => exportOrderPrint(row, stores)}>
+                          <PrinterIcon className="w-4 h-4" />
+                        </IconButton>
+                      </Tooltip>
                     </div>
                   </td>
                 </tr>

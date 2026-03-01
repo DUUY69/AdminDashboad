@@ -20,6 +20,7 @@ export function Footer({ brandName, brandLink, routes }) {
           </a>{" "}
           for a better web.
         </Typography>
+        {routes && routes.length > 0 && (
         <ul className="flex items-center gap-4">
           {routes.map(({ name, path }) => (
             <li key={name}>
@@ -35,6 +36,7 @@ export function Footer({ brandName, brandLink, routes }) {
             </li>
           ))}
         </ul>
+        )}
       </div>
     </footer>
   );
