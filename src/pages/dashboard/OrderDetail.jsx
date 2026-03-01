@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardBody, Typography, Button, Chip } from "@material-tailwind/react";
-import { ArrowLeftIcon, PrinterIcon, CheckCircleIcon, PhotoIcon, DocumentTextIcon, DocumentArrowDownIcon } from "@heroicons/react/24/solid";
+import { ArrowLeftIcon, PrinterIcon, CheckCircleIcon, PhotoIcon, DocumentTextIcon, DocumentArrowDownIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { useData } from "@/context/DataContext";
 import { useAuth } from "@/context";
 
@@ -104,6 +104,44 @@ export function OrderDetail() {
   const order = orderIndex >= 0 ? orders[orderIndex] : null;
 
   const canConfirmReceive = (os) => os.status === "Delivered";
+
+  // Admin chấp nhận hoặc từ chối đơn khi đơn đang Submitted
+  const canAdminAcceptOrRejectOrder = order && order.status === "Submitted";
+
+  const handleAdminAcceptOrder = () => {
+    const next = orders.map((o) => {
+      if (o.id !== order.id) return o;
+      const newOrderSuppliers = (o.orderSuppliers || []).map((os) =>
+        os.status === "Pending" ? { ...os, status: "Confirmed", confirmDate: new Date().toISOString().slice(0, 10) } : os
+      );
+      return { ...o, orderSuppliers: newOrderSuppliers, status: "Processing" };
+    });
+    setOrders(next);
+  };
+
+  const handleAdminRejectOrder = () => {
+    const next = orders.map((o) => {
+      if (o.id !== order.id) return o;
+      const newOrderSuppliers = (o.orderSuppliers || []).map((os) => ({ ...os, status: "Rejected" }));
+      return { ...o, orderSuppliers: newOrderSuppliers, status: "Cancelled" };
+    });
+    setOrders(next);
+  };
+
+  // Admin chấp nhận đơn tổng (đóng đơn) khi tất cả NCC đã Delivered hoặc Completed
+  const canAdminConfirmOrder = order && order.status === "Processing" && (order.orderSuppliers || []).length > 0
+    && (order.orderSuppliers || []).every((os) => os.status === "Delivered" || os.status === "Completed" || os.status === "Rejected");
+
+  const handleAdminConfirmOrder = () => {
+    const next = orders.map((o) => {
+      if (o.id !== order.id) return o;
+      const newOrderSuppliers = (o.orderSuppliers || []).map((os) =>
+        os.status === "Delivered" ? { ...os, status: "Completed", actualDeliveryDate: os.actualDeliveryDate || new Date().toISOString().slice(0, 10) } : os
+      );
+      return { ...o, orderSuppliers: newOrderSuppliers, status: "Completed" };
+    });
+    setOrders(next);
+  };
 
   const openConfirmModal = (osId) => {
     setConfirmModal({ open: true, osId });
@@ -247,17 +285,39 @@ export function OrderDetail() {
             <Typography variant="small" color="gray">{order.storeName} · {order.orderDate}</Typography>
             <Typography variant="small" className="block mt-1">Tổng số dòng: {order.totalItemCount}. Trạng thái: {order.status}.</Typography>
           </div>
-          <div className="flex-shrink-0">
-            <Chip color={order.status === "Completed" ? "green" : order.status === "Draft" ? "gray" : "blue"} value={order.status} />
+          <div className="flex-shrink-0 flex flex-wrap items-center gap-2">
+            <Chip color={order.status === "Completed" ? "green" : order.status === "Draft" ? "gray" : order.status === "Cancelled" ? "red" : "blue"} value={order.status} />
+            {isAdmin && canAdminAcceptOrRejectOrder && (
+              <>
+                <Button size="sm" color="green" className="flex items-center gap-1 whitespace-nowrap" onClick={handleAdminAcceptOrder} title="Admin chấp nhận đơn, chuyển sang xử lý">
+                  <CheckCircleIcon className="w-4 h-4" /> Chấp nhận đơn
+                </Button>
+                <Button size="sm" color="red" variant="outlined" className="flex items-center gap-1 whitespace-nowrap" onClick={handleAdminRejectOrder} title="Admin từ chối đơn">
+                  <XMarkIcon className="w-4 h-4" /> Từ chối đơn
+                </Button>
+              </>
+            )}
+            {isAdmin && canAdminConfirmOrder && (
+              <Button size="sm" color="green" className="flex items-center gap-1 whitespace-nowrap" onClick={handleAdminConfirmOrder} title="Admin chấp nhận đơn tổng, đóng đơn">
+                <CheckCircleIcon className="w-4 h-4" /> Chấp nhận đơn tổng
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardBody className="p-4">
           <Typography variant="h6" color="blue-gray" className="mb-2">Quy trình đơn tổng</Typography>
           <OrderTimeline currentStatus={order.status} createdDate={order.createdDate} orderDate={order.orderDate} />
+          {isAdmin && canAdminAcceptOrRejectOrder && (
+            <Typography variant="small" color="gray" className="mt-2">Đơn đang chờ duyệt. <strong>Admin</strong>: Bấm &quot;Chấp nhận đơn&quot; để chuyển sang xử lý, hoặc &quot;Từ chối đơn&quot; để hủy.</Typography>
+          )}
+          {isAdmin && canAdminConfirmOrder && (
+            <Typography variant="small" color="gray" className="mt-2">Tất cả NCC đã giao xong. <strong>Admin</strong>: Bấm &quot;Chấp nhận đơn tổng&quot; để đóng đơn (khác với Store xác nhận đã nhận hàng).</Typography>
+          )}
         </CardBody>
       </Card>
 
       <Typography variant="h6" className="mb-3">Chi tiết theo từng NCC & theo dõi quy trình</Typography>
+      <Typography variant="small" color="gray" className="mb-2 block">Store: dùng &quot;Xác nhận đã nhận hàng&quot; khi đã nhận hàng từ NCC (có thể gửi ảnh). Admin: dùng &quot;Chấp nhận đơn tổng&quot; ở trên để chấp nhận cả đơn.</Typography>
       {(order.orderSuppliers || []).map((os) => (
         <Card key={os.id} className="border border-blue-gray-100 mb-4">
           <CardHeader className="p-4 border-b flex flex-col gap-3 bg-blue-gray-50/50 sm:flex-row sm:items-start sm:justify-between">
@@ -273,8 +333,8 @@ export function OrderDetail() {
               )}
               <Chip size="sm" color={osStatusColors[os.status] || "gray"} value={os.status} />
               {isStoreOrder && canConfirmReceive(os) && (
-                <Button size="sm" color="green" className="flex items-center gap-1 whitespace-nowrap" onClick={() => handleConfirmReceive(os.id)}>
-                  <CheckCircleIcon className="w-4 h-4" /> Xác nhận nhận hàng
+                <Button size="sm" color="teal" className="flex items-center gap-1 whitespace-nowrap" onClick={() => handleConfirmReceive(os.id)} title="Store xác nhận đã nhận được hàng từ NCC này, có thể gửi ảnh">
+                  <CheckCircleIcon className="w-4 h-4" /> Xác nhận đã nhận hàng
                 </Button>
               )}
             </div>
@@ -347,8 +407,8 @@ export function OrderDetail() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setConfirmModal({ open: false, osId: null })}>
           <Card className="w-full max-w-md" onClick={(e) => e.stopPropagation()}>
             <CardHeader className="p-4 border-b">
-              <Typography variant="h6">Xác nhận nhận hàng & gửi ảnh</Typography>
-              <Typography variant="small" color="gray">Tải ảnh đơn hàng nhận được và hóa đơn đã ký (có thể nhiều ảnh). Admin sẽ xem được.</Typography>
+              <Typography variant="h6">Xác nhận đã nhận hàng (Store)</Typography>
+              <Typography variant="small" color="gray">Store xác nhận đã nhận được hàng từ NCC này. Tải ảnh hàng nhận được và hóa đơn đã ký (có thể nhiều ảnh). Admin sẽ xem được.</Typography>
             </CardHeader>
             <CardBody className="flex flex-col gap-4 p-4">
               <div>
@@ -365,7 +425,7 @@ export function OrderDetail() {
               </div>
               <div className="flex gap-2 justify-end pt-2">
                 <Button variant="outlined" onClick={() => setConfirmModal({ open: false, osId: null })}>Hủy</Button>
-                <Button color="green" onClick={handleConfirmReceiveWithImages}>Xác nhận & gửi ảnh</Button>
+                <Button color="teal" onClick={handleConfirmReceiveWithImages}>Xác nhận đã nhận hàng & gửi ảnh</Button>
               </div>
             </CardBody>
           </Card>

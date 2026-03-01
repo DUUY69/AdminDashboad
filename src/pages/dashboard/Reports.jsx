@@ -64,7 +64,31 @@ export function Reports() {
     },
   }), [byStore]);
 
-  const exportExcel = () => alert("Chức năng Export Excel sẽ kết nối BE. Hiện tại dùng dữ liệu mẫu.");
+  const totalOrderSuppliers = filteredOrders.reduce((s, o) => s + (o.orderSuppliers || []).length, 0);
+  const completedOrderSuppliers = filteredOrders.reduce((s, o) => {
+    return s + (o.orderSuppliers || []).filter((os) => os.status === "Completed" || os.status === "Delivered").length;
+  }, 0);
+
+  const exportExcel = () => {
+    const BOM = "\uFEFF";
+    let csv = "Báo cáo;Giá trị\n";
+    csv += `Tổng đơn (Order) trong kỳ;${filteredOrders.length}\n`;
+    csv += `Tổng đơn con (OrderSupplier);${totalOrderSuppliers}\n`;
+    csv += `Đơn con đã hoàn thành;${completedOrderSuppliers}\n\n`;
+    csv += "Report theo NCC\n";
+    csv += "NCC;Số đơn;Đã hoàn thành;Tổng SL SP\n";
+    bySupplier.forEach((r) => { csv += `"${r.name}";${r.totalOrders};${r.completed};${r.totalItems}\n`; });
+    csv += "\nReport theo Cửa hàng\n";
+    csv += "Cửa hàng;Tổng số đơn\n";
+    byStore.forEach((r) => { csv += `"${r.name}";${r.totalOrders}\n`; });
+    const blob = new Blob([BOM + csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `bao-cao-${filterDateFrom || "tu-dau"}-${filterDateTo || "den-cuoi"}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const hasFilters = filterDateFrom || filterDateTo;
   const clearFilters = () => { setFilterDateFrom(""); setFilterDateTo(""); };
@@ -73,8 +97,33 @@ export function Reports() {
     <div className="mt-12">
       <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
         <Typography variant="h4" color="blue-gray">Báo cáo thống kê</Typography>
-        <Button className="flex items-center gap-2" onClick={exportExcel}><ArrowDownTrayIcon className="w-5 h-5" /> Export Excel</Button>
+        <Button className="flex items-center gap-2" onClick={exportExcel}><ArrowDownTrayIcon className="w-5 h-5" /> Export CSV</Button>
       </div>
+
+      {(hasFilters || filteredOrders.length > 0) && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <Card className="border border-blue-gray-100 p-4">
+            <Typography variant="small" color="gray">Tổng đơn trong kỳ</Typography>
+            <Typography variant="h4" className="mt-1">{filteredOrders.length}</Typography>
+            <Typography variant="small" color="gray">Order</Typography>
+          </Card>
+          <Card className="border border-blue-gray-100 p-4">
+            <Typography variant="small" color="gray">Tổng đơn con (NCC)</Typography>
+            <Typography variant="h4" className="mt-1">{totalOrderSuppliers}</Typography>
+            <Typography variant="small" color="gray">OrderSupplier</Typography>
+          </Card>
+          <Card className="border border-blue-gray-100 p-4">
+            <Typography variant="small" color="gray">Đơn con đã hoàn thành</Typography>
+            <Typography variant="h4" className="mt-1 text-green-600">{completedOrderSuppliers}</Typography>
+            <Typography variant="small" color="gray">Completed / Delivered</Typography>
+          </Card>
+          <Card className="border border-blue-gray-100 p-4">
+            <Typography variant="small" color="gray">Tỷ lệ hoàn thành</Typography>
+            <Typography variant="h4" className="mt-1">{totalOrderSuppliers ? Math.round((completedOrderSuppliers / totalOrderSuppliers) * 100) : 0}%</Typography>
+            <Typography variant="small" color="gray">theo đơn con</Typography>
+          </Card>
+        </div>
+      )}
 
       <Card className="border border-blue-gray-100 mb-6">
         <CardHeader className="p-4 border-b">

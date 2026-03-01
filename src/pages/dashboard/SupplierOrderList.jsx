@@ -57,6 +57,9 @@ export function SupplierOrderList() {
           </div>
         </CardHeader>
         <CardBody className="overflow-x-auto p-0">
+          <div className="px-4 py-2 border-b border-blue-gray-50">
+            <Typography variant="small" color="gray">Hiển thị <strong>{filtered.length}</strong> đơn con</Typography>
+          </div>
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
@@ -68,7 +71,13 @@ export function SupplierOrderList() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((os) => (
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-12 text-center">
+                    <Typography color="gray">Chưa có đơn nào thuộc NCC của bạn hoặc không thỏa bộ lọc.</Typography>
+                  </td>
+                </tr>
+              ) : filtered.map((os) => (
                 <tr key={os.id}>
                   <td className="py-3 px-4 border-b border-blue-gray-50"><Typography variant="small">{os.id}</Typography></td>
                   <td className="py-3 px-4 border-b border-blue-gray-50"><Typography variant="small">#{os.orderId}</Typography></td>

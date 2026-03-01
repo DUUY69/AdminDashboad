@@ -129,7 +129,7 @@ export function CreateOrder() {
           <CardHeader className="p-4 border-b flex flex-row items-center justify-between">
             <Typography variant="h6">Giỏ đơn ({cart.length} dòng)</Typography>
             {cart.length > 0 && (
-              <Button size="sm" color="blue" onClick={submitOrder}>Submit đơn</Button>
+              <Button size="sm" color="blue" onClick={submitOrder} disabled={cart.length === 0} title={cart.length === 0 ? "Thêm sản phẩm vào giỏ trước khi gửi" : ""}>Submit đơn</Button>
             )}
           </CardHeader>
           <CardBody className="max-h-[400px] overflow-y-auto">

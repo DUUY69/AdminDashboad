@@ -28,7 +28,14 @@ export function DashboardHome() {
   const deliveringCount = orders.filter(
     (o) => o.status === "Processing" || o.orderSuppliers?.some((os) => os.status === "Delivering")
   ).length;
-  const lateCount = 1; // mock
+  const today = new Date().toISOString().slice(0, 10);
+  const lateCount = orders.reduce((sum, o) => {
+    return sum + (o.orderSuppliers || []).filter((os) => {
+      if (os.status === "Delivering" && os.expectedDeliveryDate) return os.expectedDeliveryDate < today;
+      if ((os.status === "Delivered" || os.status === "Completed") && os.actualDeliveryDate && os.expectedDeliveryDate) return os.actualDeliveryDate > os.expectedDeliveryDate;
+      return false;
+    }).length;
+  }, 0);
 
   const storeOrders = isStoreUser ? orders.filter((o) => o.storeId === currentUser?.storeId) : [];
   const supplierOrderSuppliers = isSupplierUser

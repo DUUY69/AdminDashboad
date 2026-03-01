@@ -12,7 +12,7 @@ import {
   Button,
 } from "@material-tailwind/react";
 import { FilterSelect } from "@/components/FilterSelect";
-import { PrinterIcon, FunnelIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { PrinterIcon, FunnelIcon, XMarkIcon, CheckCircleIcon } from "@heroicons/react/24/solid";
 import { useData } from "@/context/DataContext";
 import { useAuth } from "@/context";
 
@@ -34,8 +34,26 @@ function exportOrderPrint(order, stores) {
 }
 
 export function OrderList() {
-  const { orders, stores, suppliers } = useData();
+  const { orders, setOrders, stores, suppliers } = useData();
   const { currentUser, isAdmin, isStoreUser } = useAuth();
+
+  const handleAdminAcceptOrder = (order) => {
+    setOrders(orders.map((o) => {
+      if (o.id !== order.id) return o;
+      const newOrderSuppliers = (o.orderSuppliers || []).map((os) =>
+        os.status === "Pending" ? { ...os, status: "Confirmed", confirmDate: new Date().toISOString().slice(0, 10) } : os
+      );
+      return { ...o, orderSuppliers: newOrderSuppliers, status: "Processing" };
+    }));
+  };
+
+  const handleAdminRejectOrder = (order) => {
+    setOrders(orders.map((o) => {
+      if (o.id !== order.id) return o;
+      const newOrderSuppliers = (o.orderSuppliers || []).map((os) => ({ ...os, status: "Rejected" }));
+      return { ...o, orderSuppliers: newOrderSuppliers, status: "Cancelled" };
+    }));
+  };
   const navigate = useNavigate();
   const [filterStatus, setFilterStatus] = useState("");
   const [filterSupplier, setFilterSupplier] = useState("");
@@ -104,6 +122,9 @@ export function OrderList() {
           </div>
         </CardHeader>
         <CardBody className="overflow-x-auto p-0">
+          <div className="px-4 py-2 border-b border-blue-gray-50 flex justify-between items-center">
+            <Typography variant="small" color="gray">Hiển thị <strong>{list.length}</strong> đơn</Typography>
+          </div>
           <table className="w-full min-w-[640px] table-auto">
             <thead>
               <tr>
@@ -111,25 +132,47 @@ export function OrderList() {
                 <th className="border-b border-blue-gray-50 py-3 px-4 text-left"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Cửa hàng</Typography></th>
                 <th className="border-b border-blue-gray-50 py-3 px-4 text-left"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Ngày đặt</Typography></th>
                 <th className="border-b border-blue-gray-50 py-3 px-4 text-left"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Trạng thái</Typography></th>
-                <th className="border-b border-blue-gray-50 py-3 px-4 text-left"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Thao tác</Typography></th>
+                <th className="border-b border-blue-gray-50 py-3 px-4 text-left w-px"><Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">Thao tác</Typography></th>
               </tr>
             </thead>
             <tbody>
-              {list.map((row) => (
+              {list.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-12 text-center">
+                    <Typography color="gray">Không có đơn nào thỏa bộ lọc. Thử xóa bộ lọc hoặc tạo đơn mới.</Typography>
+                  </td>
+                </tr>
+              ) : list.map((row) => (
                 <tr key={row.id} className="hover:bg-blue-gray-50/50">
                   <td className="py-3 px-4 border-b border-blue-gray-50"><Typography variant="small">#{row.id}</Typography></td>
                   <td className="py-3 px-4 border-b border-blue-gray-50"><Typography variant="small">{row.storeName}</Typography></td>
                   <td className="py-3 px-4 border-b border-blue-gray-50"><Typography variant="small">{row.orderDate}</Typography></td>
                   <td className="py-3 px-4 border-b border-blue-gray-50"><Chip size="sm" color={statusColors[row.status] || "gray"} value={row.status} /></td>
-                  <td className="py-3 px-4 border-b border-blue-gray-50 flex items-center gap-1">
-                    <Typography as="a" href="#" className="text-xs font-semibold text-blue-600" onClick={(e) => { e.preventDefault(); navigate(`/dashboard/orders/${row.id}`); }}>
-                      Xem / Theo dõi
-                    </Typography>
-                    <Tooltip content="Xuất đơn / In">
-                      <IconButton variant="text" size="sm" onClick={() => exportOrderPrint(row, stores)}>
-                        <PrinterIcon className="w-4 h-4" />
-                      </IconButton>
-                    </Tooltip>
+                  <td className="py-3 px-4 border-b border-blue-gray-50 align-top w-px">
+                    <div className="flex flex-col gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Typography as="a" href="#" className="text-xs font-semibold text-blue-600 hover:underline" onClick={(e) => { e.preventDefault(); navigate(`/dashboard/orders/${row.id}`); }}>
+                          Xem / Theo dõi
+                        </Typography>
+                        <span className="text-blue-gray-300">|</span>
+                        <Tooltip content="Xuất đơn / In">
+                          <IconButton variant="text" size="sm" onClick={() => exportOrderPrint(row, stores)}>
+                            <PrinterIcon className="w-4 h-4" />
+                          </IconButton>
+                        </Tooltip>
+                      </div>
+                      {isAdmin && row.status === "Submitted" && (
+                        <div className="flex items-center gap-2 pt-1 border-t border-blue-gray-100">
+                          <Typography variant="small" className="text-blue-gray-500 shrink-0">Duyệt:</Typography>
+                          <Button size="sm" color="green" variant="filled" className="!min-h-8 !py-1.5 !px-2.5 text-xs font-medium" onClick={() => handleAdminAcceptOrder(row)}>
+                            <CheckCircleIcon className="w-4 h-4 mr-1" /> Chấp nhận
+                          </Button>
+                          <Button size="sm" color="red" variant="outlined" className="!min-h-8 !py-1.5 !px-2.5 text-xs font-medium" onClick={() => handleAdminRejectOrder(row)}>
+                            <XMarkIcon className="w-4 h-4 mr-1" /> Từ chối
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

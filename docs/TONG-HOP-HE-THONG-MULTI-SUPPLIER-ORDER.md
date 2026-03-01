@@ -237,11 +237,36 @@ User → Store (StoreUser) hoặc Supplier (SupplierUser)
 - Chọn **tài khoản demo** (dropdown: Admin, StoreUser từng Store, SupplierUser từng NCC).
 - Đăng nhập → redirect `/dashboard/home`. Menu sidebar thay đổi theo role.
 
-### 6.2 Dashboard (Home)
+### 6.2 Dashboard (Home) – Chi tiết
 
-- **Admin**: 4 thẻ thống kê (Tổng đơn, Đang xử lý, …), 3 biểu đồ (đơn theo tháng, trend, theo trạng thái), bảng **Đơn gần đây** (cột Thao tác: Xem/Theo dõi), Tổng quan đơn hàng.
-- **Store**: Layout tương tự; dữ liệu lọc theo Store; thẻ thứ 4 có link Tạo đơn + Danh sách đơn; bảng Đơn gần đây có Thao tác Xem/Theo dõi.
-- **Supplier**: Thống kê đơn mới (Pending), đơn cần giao; link Đơn cần xử lý.
+**Route:** `/dashboard/home`. Nội dung thay đổi theo role.
+
+#### 6.2.1 Dashboard Admin
+
+| Thành phần | Chi tiết |
+|------------|----------|
+| **4 thẻ thống kê (StatisticsCard)** | **1. Tổng số đơn**: Tổng số Order toàn hệ thống; footer "Toàn hệ thống". **2. Đơn đang giao**: Số đơn có status = Processing hoặc có ít nhất 1 OrderSupplier Delivering; footer "Processing". **3. NCC giao trễ**: Số lượng (mock); footer "Cần theo dõi". **4. Báo cáo tháng**: Text "Xem"; footer link **Đến trang Report** (`/dashboard/reports`). |
+| **3 biểu đồ (StatisticsChart)** | **1. Xem đơn theo tháng**: Bar chart – trục X: T1→T12, trục Y: số đơn tạo trong tháng (theo `orderDate`). **2. Doanh số đơn hàng**: Line chart – xu hướng đơn theo 4 tuần trong tháng. **3. Các đơn theo trạng thái**: Bar chart – trục X: Draft, Submitted, Processing, Completed, Cancelled; trục Y: số đơn. Footer mỗi chart: ghi chú nguồn dữ liệu. |
+| **Bảng Đơn gần đây** | Cột: **Mã đơn** (#id), **Cửa hàng**, **Ngày đặt**, **Trạng thái** (Chip màu), **Thao tác** (nút "Xem / Theo dõi" → `/dashboard/orders/:id`). Hiển thị 5 đơn mới nhất (slice reverse). Header có nút **Xem tất cả** → Danh sách đơn. |
+| **Card Tổng quan đơn hàng** | Danh sách dạng timeline (icon + title + description): 6 đơn gần nhất, mỗi dòng: "Đơn #id - StoreName", "orderDate · status". Không có nút thao tác, chỉ xem nhanh. |
+
+#### 6.2.2 Dashboard Store User
+
+| Thành phần | Chi tiết |
+|------------|----------|
+| **4 thẻ thống kê** | **1. Tổng số đơn**: Số Order của **Store mình** (`storeId` = currentUser.storeId); footer tên Store. **2. Đơn đang giao**: Số đơn Store có status = Processing. **3. Đơn chờ xử lý**: Số đơn Store có status = Submitted. **4. Tạo đơn / Theo dõi**: Text "→"; footer hai link **Tạo đơn** (`/dashboard/create-order`) và **Danh sách đơn** (`/dashboard/orders`). |
+| **3 biểu đồ** | Cùng loại với Admin nhưng **chỉ tính trên đơn của Store**: (1) Đơn theo tháng của Store, (2) Xu hướng đơn theo tuần của Store, (3) Đơn theo trạng thái của Store. |
+| **Bảng Đơn gần đây** | Cấu trúc giống Admin; chỉ hiển thị đơn của Store; cột Thao tác: **Xem / Theo dõi** → Chi tiết đơn. |
+| **Tổng quan đơn hàng** | Timeline 6 đơn gần nhất **của Store**. |
+
+#### 6.2.3 Dashboard Supplier User
+
+| Thành phần | Chi tiết |
+|------------|----------|
+| **Thẻ 1 – Đơn mới (Pending)** | Số OrderSupplier của NCC mình có `status = Pending`; footer "Cần xác nhận". |
+| **Thẻ 2 – Đơn giao hôm nay** | Số OrderSupplier của NCC mình có `expectedDeliveryDate = hôm nay` (ngày cố định demo). |
+| **Thẻ 3 – Nút hành động** | Card lớn: nút **Xem danh sách đơn của tôi** → `/dashboard/supplier-orders`. |
+| **Card hướng dẫn** | Text: "NCC: **tên NCC**. Vào 'Đơn cần xử lý' để Confirm / Reject / cập nhật Delivering / Delivered." |
 
 ### 6.3 Danh sách đơn (Order List)
 
@@ -270,10 +295,20 @@ User → Store (StoreUser) hoặc Supplier (SupplierUser)
 - List: bộ lọc Trạng thái, Từ ngày đặt, Đến ngày đặt (ngang, cách đều).
 - Detail: thao tác Confirm, Reject, Partial, Delivering, Delivered.
 
-### 6.8 Báo cáo
+### 6.8 Báo cáo (Reports) – Chi tiết
 
-- Bộ lọc: Từ ngày, Đến ngày (ngang).
-- Hai chart + hai bảng (theo NCC, theo Cửa hàng); nút Export Excel.
+**Route:** `/dashboard/reports`. Chỉ **Admin** truy cập.
+
+| Mục | Chi tiết |
+|-----|----------|
+| **Tiêu đề & Export** | Header: "Báo cáo thống kê"; nút **Export Excel** (hiện mock alert; khi có BE sẽ xuất dữ liệu đã lọc). |
+| **Bộ lọc báo cáo** | Card riêng. **Lọc theo ngày đặt đơn**: **Từ ngày** (Input date), **Đến ngày** (Input date). Chỉ đơn có `orderDate` trong khoảng [Từ ngày, Đến ngày] mới được tính vào biểu đồ và bảng. Nút **Xóa bộ lọc** khi đã chọn ít nhất một ngày. Layout: hàng ngang, gap đều. |
+| **Biểu đồ 1 – Đơn theo NCC** | **Title:** "Biểu đồ đơn theo NCC". **Mô tả:** Tổng số đơn (OrderSupplier) theo từng nhà cung cấp. **Loại:** Bar chart. **Trục X:** Tên NCC (rút gọn nếu > 15 ký tự). **Trục Y:** Số lượng OrderSupplier. **Màu:** #0288d1. |
+| **Biểu đồ 2 – Đơn theo Cửa hàng** | **Title:** "Biểu đồ đơn theo Cửa hàng". **Mô tả:** Tổng số đơn (Order) theo từng cửa hàng. **Loại:** Bar chart. **Trục X:** Tên cửa hàng. **Trục Y:** Số Order. **Màu:** #388e3c. |
+| **Bảng Report theo NCC** | Cột: **NCC** (tên), **Số đơn** (tổng OrderSupplier của NCC đó trong kỳ lọc), **Đã hoàn thành** (số OrderSupplier có status Completed hoặc Delivered), **Tổng SL sản phẩm** (tổng quantity của tất cả OrderItem thuộc NCC đó). Một dòng cho mỗi NCC trong danh sách Supplier. |
+| **Bảng Report theo Cửa hàng** | Cột: **Cửa hàng** (tên), **Tổng số đơn** (số Order có `storeId` trùng, trong kỳ lọc). Một dòng cho mỗi Store. |
+| **Chỉ số tổng hợp (gợi ý mở rộng)** | Có thể bổ sung: Tổng số đơn trong kỳ, Tổng số OrderSupplier đã hoàn thành, Tỷ lệ hoàn thành theo NCC/Cửa hàng. Hiện tại chưa có card tổng hợp phía trên. |
+| **Mở rộng sau (chưa làm)** | Report theo **sản phẩm** (số lượng đặt theo SP, theo NCC/Store); **KPI NCC** (tỷ lệ giao đủ, giao trễ, thời gian xử lý TB); Báo cáo theo **trạng thái** (phân bổ Draft/Submitted/... trong kỳ); Export Excel thật (file .xlsx từ BE). |
 
 ---
 
