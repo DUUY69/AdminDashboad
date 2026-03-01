@@ -2,3 +2,16 @@ export * from "@/pages/dashboard/home";
 export * from "@/pages/dashboard/profile";
 export * from "@/pages/dashboard/tables";
 export * from "@/pages/dashboard/notifications";
+// Multi-Supplier Order System
+export * from "@/pages/dashboard/DashboardHome";
+export * from "@/pages/dashboard/Suppliers";
+export * from "@/pages/dashboard/Categories";
+export * from "@/pages/dashboard/Products";
+export * from "@/pages/dashboard/Stores";
+export * from "@/pages/dashboard/Users";
+export * from "@/pages/dashboard/CreateOrder";
+export * from "@/pages/dashboard/OrderList";
+export * from "@/pages/dashboard/OrderDetail";
+export * from "@/pages/dashboard/SupplierOrderList";
+export * from "@/pages/dashboard/SupplierOrderDetail";
+export * from "@/pages/dashboard/Reports";

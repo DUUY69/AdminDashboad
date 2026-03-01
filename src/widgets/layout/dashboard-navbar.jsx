@@ -1,4 +1,4 @@
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import {
   Navbar,
   Typography,
@@ -19,18 +19,27 @@ import {
   ClockIcon,
   CreditCardIcon,
   Bars3Icon,
+  ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/solid";
 import {
   useMaterialTailwindController,
   setOpenConfigurator,
   setOpenSidenav,
+  useAuth,
 } from "@/context";
 
 export function DashboardNavbar() {
   const [controller, dispatch] = useMaterialTailwindController();
   const { fixedNavbar, openSidenav } = controller;
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { currentUser, logout } = useAuth();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
+
+  const handleLogout = () => {
+    logout();
+    navigate("/auth/sign-in");
+  };
 
   return (
     <Navbar
@@ -50,7 +59,7 @@ export function DashboardNavbar() {
               fixedNavbar ? "mt-1" : ""
             }`}
           >
-            <Link to={`/${layout}`}>
+            <Link to="/dashboard">
               <Typography
                 variant="small"
                 color="blue-gray"
@@ -64,11 +73,11 @@ export function DashboardNavbar() {
               color="blue-gray"
               className="font-normal"
             >
-              {page}
+              {page || "home"}
             </Typography>
           </Breadcrumbs>
           <Typography variant="h6" color="blue-gray">
-            {page}
+            {page || "Dashboard"}
           </Typography>
         </div>
         <div className="flex items-center">
@@ -83,20 +92,30 @@ export function DashboardNavbar() {
           >
             <Bars3Icon strokeWidth={3} className="h-6 w-6 text-blue-gray-500" />
           </IconButton>
-          <Link to="/auth/sign-in">
-            <Button
-              variant="text"
-              color="blue-gray"
-              className="hidden items-center gap-1 px-4 xl:flex normal-case"
-            >
-              <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-              Sign In
-            </Button>
-            <IconButton
-              variant="text"
-              color="blue-gray"
-              className="grid xl:hidden"
-            >
+          <Menu>
+            <MenuHandler>
+              <Button
+                variant="text"
+                color="blue-gray"
+                className="hidden items-center gap-1 px-4 xl:flex normal-case"
+              >
+                <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
+                {currentUser?.name || "User"}
+              </Button>
+            </MenuHandler>
+            <MenuList>
+              <MenuItem className="flex items-center gap-2">
+                <Typography variant="small">{currentUser?.name}</Typography>
+                <Typography variant="small" color="gray">({currentUser?.role})</Typography>
+              </MenuItem>
+              <MenuItem onClick={handleLogout} className="flex items-center gap-2">
+                <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                Đăng xuất
+              </MenuItem>
+            </MenuList>
+          </Menu>
+          <Link to="/auth/sign-in" className="xl:hidden">
+            <IconButton variant="text" color="blue-gray">
               <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
             </IconButton>
           </Link>
